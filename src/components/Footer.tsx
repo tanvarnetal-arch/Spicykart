@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Facebook, Instagram, Twitter, MapPin, Phone, Mail } from 'lucide-react';
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Footer: React.FC = () => {
@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4">
             <Link to="/" className="flex items-center gap-2">
-              <Leaf className="h-6 w-6 text-primary" />
+              <img src="/logo.png" alt="Spicy Kart Logo" className="h-8 w-8 object-contain" />
               <span className="text-xl font-bold tracking-tight text-primary">Spicy Kart</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">

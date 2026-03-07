@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Leaf, UserPlus, User, Lock, Mail } from 'lucide-react';
+import { UserPlus, User, Lock, Mail } from 'lucide-react';
 import { toast } from 'sonner';
+import PageMeta from '@/components/common/PageMeta';
 
 const Signup: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -69,13 +70,14 @@ const Signup: React.FC = () => {
 
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-12">
+      <PageMeta title="Create Account | Spicy Kart" description="Join Spicy Kart today for premium organic products." />
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,hsl(var(--primary)/0.05)_0%,transparent_100%)]" />
 
       <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/80 dark:bg-card/80 backdrop-blur-xl">
         <CardHeader className="space-y-4 pt-10 pb-6 text-center">
           <div className="flex justify-center">
-            <div className="p-3 bg-primary/10 rounded-2xl">
-              <Leaf className="h-10 w-10 text-primary" />
+            <div className="p-1 bg-primary/10 rounded-2xl overflow-hidden">
+              <img src="/logo.png" alt="Spicy Kart Logo" className="h-16 w-16 object-contain" />
             </div>
           </div>
           <div className="space-y-2">

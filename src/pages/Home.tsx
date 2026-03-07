@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Truck, ShieldCheck, HeartPulse, ChevronRight, ShoppingCart } from 'lucide-react';
+import { Truck, ShieldCheck, HeartPulse, ChevronRight, ShoppingCart } from 'lucide-react';
 import { categories } from '@/data/products';
 import { productApi } from '@/db/api';
 import { Product } from '@/types/products';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import PageMeta from '@/components/common/PageMeta';
 
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -28,13 +29,17 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-16 pb-16">
+      <PageMeta
+        title="Spicy Kart | Natural & Organic Superfoods"
+        description="Premium healthy organic products delivered straight to your door. Quality you can trust, flavor you'll love."
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-secondary/30 py-20 lg:py-32">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 bg-primary rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-64 h-64 bg-accent rounded-full blur-3xl" />
         </div>
-        
+
         <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col items-start gap-6 text-left">
             <Badge variant="outline" className="border-primary/30 text-primary-foreground bg-primary px-4 py-1.5 font-bold uppercase tracking-wider text-xs">
@@ -45,7 +50,7 @@ const Home: React.FC = () => {
               <span className="text-primary italic">Nature\'s Finest</span>
             </h1>
             <p className="max-w-[600px] text-lg text-muted-foreground md:text-xl leading-relaxed">
-              Explore our premium collection of handpicked organic nuts, seeds, and healthy superfoods. 
+              Explore our premium collection of handpicked organic nuts, seeds, and healthy superfoods.
               Pure ingredients, uncompromising quality.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -62,16 +67,16 @@ const Home: React.FC = () => {
               </Link>
             </div>
           </div>
-          
+
           <div className="relative aspect-[4/3] w-full max-w-2xl mx-auto overflow-hidden rounded-3xl shadow-2xl group">
-             <img
+            <img
               src="https://miaoda-site-img.s3cdn.medo.dev/images/KLing_7143a5c5-d21a-497b-8dec-191a4be2dcc7.jpg"
               alt="Premium organic products display"
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8 text-white">
               <div className="flex items-center gap-2 mb-2">
-                <Leaf className="h-5 w-5 text-accent fill-accent" />
+                <img src="/logo.png" alt="Spicy Kart Logo" className="h-5 w-5 object-contain" />
                 <span className="font-bold tracking-widest uppercase text-xs">Certified Organic</span>
               </div>
               <h2 className="text-3xl font-bold mb-2">Medjool Dates & California Almonds</h2>
@@ -117,7 +122,7 @@ const Home: React.FC = () => {
             View All <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5 lg:gap-8">
           {categories.map((category) => (
             <Link
@@ -149,7 +154,7 @@ const Home: React.FC = () => {
             Shop Store <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -161,7 +166,7 @@ const Home: React.FC = () => {
       <section className="container">
         <div className="relative overflow-hidden rounded-[2.5rem] bg-primary px-8 py-16 text-primary-foreground md:px-16 md:py-24 shadow-2xl shadow-primary/30">
           <div className="absolute top-0 right-0 h-full w-1/2 opacity-20 hidden md:block">
-             <div className="h-full w-full bg-white rotate-45 translate-x-1/2 translate-y-1/2 rounded-full" />
+            <div className="h-full w-full bg-white rotate-45 translate-x-1/2 translate-y-1/2 rounded-full" />
           </div>
           <div className="relative z-10 flex flex-col items-center gap-8 text-center md:items-start md:text-left max-w-3xl">
             <Badge className="bg-white/20 hover:bg-white/30 text-white border-none px-6 py-2 text-sm font-bold tracking-widest uppercase">Special Offer</Badge>

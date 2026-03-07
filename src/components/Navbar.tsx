@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, Leaf, Menu, Sun, Moon, ChevronDown, User, Shield, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Search, Menu, Sun, Moon, ChevronDown, User, Shield, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -68,7 +68,7 @@ const Navbar: React.FC = () => {
           </Sheet>
 
           <Link to="/" className="flex items-center gap-2 group">
-            <Leaf className="h-6 w-6 text-primary group-hover:rotate-12 transition-transform" />
+            <img src="/logo.png" alt="Spicy Kart Logo" className="h-8 w-8 object-contain group-hover:scale-110 transition-transform" />
             <span className="hidden font-bold text-xl sm:inline-block tracking-tight text-primary">Spicy Kart</span>
           </Link>
         </div>
