@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { processPayment } from '@/lib/razorpay';
+import { orderApi } from '@/db/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
 const Cart: React.FC = () => {
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleCheckout = async () => {
@@ -31,16 +33,35 @@ const Cart: React.FC = () => {
 
       await processPayment({
         amount: finalTotal,
-        currency: 'USD',
+        currency: 'INR',
         name: 'Spicy Kart',
         description: `Payment for ${totalItems} organic items`,
         prefill: {
-          name: profile?.fullName || user.displayName || '',
-          email: user.email || '',
+          name: profile?.fullName || user.displayName || 'Test User',
+          email: user.email || 'test@example.com',
+          contact: '9999999999'
         },
-        handler: (response: any) => {
-          toast.success('Payment Successful! Order ID: ' + response.razorpay_payment_id);
-          clearCart();
+        handler: async (response: any) => {
+          try {
+            const orderId = await orderApi.create({
+              userId: user.uid,
+              totalAmount: finalTotal / 100,
+              status: 'pending',
+              items: cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.discountPrice || item.price,
+                quantity: item.quantity,
+                image: item.image,
+              })),
+              paymentId: response.razorpay_payment_id,
+            });
+            toast.success('Order placed successfully! Tracking ID: ' + orderId);
+            clearCart();
+            navigate('/profile');
+          } catch (err: any) {
+            toast.error('Payment succeeded but failed to save order: ' + err.message);
+          }
         }
       });
     } catch (e: any) {
@@ -139,10 +160,10 @@ const Cart: React.FC = () => {
                         </div>
                         <div className="flex flex-col items-end">
                           <span className="text-2xl font-black text-primary">
-                            ${((item.discountPrice || item.price) * item.quantity).toFixed(2)}
+                            ₹{((item.discountPrice || item.price) * item.quantity).toFixed(2)}
                           </span>
                           <span className="text-xs text-muted-foreground font-bold">
-                            (${(item.discountPrice || item.price).toFixed(2)} / unit)
+                            (₹{(item.discountPrice || item.price).toFixed(2)} / unit)
                           </span>
                         </div>
                       </div>
@@ -157,7 +178,7 @@ const Cart: React.FC = () => {
             <div className="flex items-center gap-6">
               <div className="flex flex-col items-center gap-2">
                 <div className="rounded-full bg-white p-3 text-primary shadow-sm"><Truck className="h-6 w-6" /></div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Free Delivery over $50</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Free Delivery over ₹50</span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <div className="rounded-full bg-white p-3 text-primary shadow-sm"><ShieldCheck className="h-6 w-6" /></div>
@@ -185,17 +206,17 @@ const Cart: React.FC = () => {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between text-lg font-bold">
                 <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>₹{totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between text-lg font-bold">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className={shipping === 0 ? 'text-green-600' : ''}>
-                  {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex items-center justify-between text-lg font-bold">
                 <span className="text-muted-foreground">Estimated Tax (5%)</span>
-                <span>${tax.toFixed(2)}</span>
+                <span>₹{tax.toFixed(2)}</span>
               </div>
             </div>
 
@@ -203,7 +224,7 @@ const Cart: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <span className="text-xl font-black text-foreground">Order Total</span>
-              <span className="text-4xl font-black text-primary">${finalTotal.toFixed(2)}</span>
+              <span className="text-4xl font-black text-primary">₹{finalTotal.toFixed(2)}</span>
             </div>
 
             <div className="flex flex-col gap-4">

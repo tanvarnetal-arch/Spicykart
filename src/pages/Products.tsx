@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, ChevronDown, LayoutGrid, List, X, SearchX } from 'lucide-react';
-import { categories } from '@/data/products';
 import { productApi } from '@/db/api';
 import { Product } from '@/types/products';
 import ProductCard from '@/components/ProductCard';
@@ -19,9 +18,13 @@ const Products: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
-  const [priceRange, setPriceRange] = useState([0, 50]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [sortBy, setSortBy] = useState('featured');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const dynamicCategories = useMemo(() => {
+    return Array.from(new Set(products.map(p => p.category)));
+  }, [products]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -77,7 +80,7 @@ const Products: React.FC = () => {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
-    setPriceRange([0, 50]);
+    setPriceRange([0, 5000]);
     setSortBy('featured');
     setSearchParams({});
   };
@@ -94,7 +97,7 @@ const Products: React.FC = () => {
           <Badge variant="outline" className="px-3 py-1 text-sm font-bold bg-primary/5 border-primary/20 text-primary">
             {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
           </Badge>
-          {(searchQuery || selectedCategory !== 'All' || priceRange[0] > 0 || priceRange[1] < 50) && (
+          {(searchQuery || selectedCategory !== 'All' || priceRange[0] > 0 || priceRange[1] < 5000) && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-destructive flex items-center gap-1">
               <X className="h-4 w-4" /> Clear All
             </Button>
@@ -115,13 +118,13 @@ const Products: React.FC = () => {
                 >
                   All Categories
                 </div>
-                {categories.map((cat) => (
+                {dynamicCategories.map((cat) => (
                   <div 
-                    key={cat.id}
-                    className={`cursor-pointer text-sm py-2 px-4 rounded-xl transition-all font-semibold ${selectedCategory === cat.name ? 'bg-primary text-white shadow-md' : 'hover:bg-primary/5 text-muted-foreground hover:text-primary'}`}
-                    onClick={() => handleCategoryChange(cat.name)}
+                    key={cat}
+                    className={`cursor-pointer text-sm py-2 px-4 rounded-xl transition-all font-semibold ${selectedCategory === cat ? 'bg-primary text-white shadow-md' : 'hover:bg-primary/5 text-muted-foreground hover:text-primary'}`}
+                    onClick={() => handleCategoryChange(cat)}
                   >
-                    {cat.name}
+                    {cat}
                   </div>
                 ))}
               </div>
@@ -132,14 +135,14 @@ const Products: React.FC = () => {
               <div className="px-2">
                 <Slider 
                   value={priceRange} 
-                  max={50} 
-                  step={1} 
+                  max={5000} 
+                  step={10} 
                   onValueChange={setPriceRange}
                   className="mb-6"
                 />
                 <div className="flex items-center justify-between text-sm font-black text-primary">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
+                  <span>₹{priceRange[0]}</span>
+                  <span>₹{priceRange[1]}</span>
                 </div>
               </div>
             </div>
@@ -194,7 +197,7 @@ const Products: React.FC = () => {
                      <div className="flex flex-col gap-4">
                       <h3 className="font-bold border-b pb-2">Categories</h3>
                       <div className="flex flex-wrap gap-2">
-                        {['All', ...categories.map(c => c.name)].map((cat) => (
+                        {['All', ...dynamicCategories].map((cat) => (
                           <Badge 
                             key={cat}
                             variant={selectedCategory === cat ? 'default' : 'outline'}
@@ -210,13 +213,13 @@ const Products: React.FC = () => {
                       <h3 className="font-bold border-b pb-2">Price Range</h3>
                       <Slider 
                         value={priceRange} 
-                        max={50} 
-                        step={1} 
+                        max={5000} 
+                        step={10} 
                         onValueChange={setPriceRange}
                       />
                       <div className="flex items-center justify-between text-xs font-bold">
-                        <span>Min: ${priceRange[0]}</span>
-                        <span>Max: ${priceRange[1]}</span>
+                        <span>Min: ₹{priceRange[0]}</span>
+                        <span>Max: ₹{priceRange[1]}</span>
                       </div>
                     </div>
                     <Button className="w-full mt-4 rounded-xl bg-primary" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>

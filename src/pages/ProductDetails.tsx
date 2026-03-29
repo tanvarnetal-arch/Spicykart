@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ShoppingCart, Star, Heart, Check, Truck, ShieldCheck, HeartPulse, Sparkles, Minus, Plus } from 'lucide-react';
 import { productApi } from '@/db/api';
 import { Product } from '@/types/products';
-import { categories } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
@@ -137,11 +136,11 @@ const ProductDetails: React.FC = () => {
           <div className="flex items-baseline gap-4 py-4 border-y border-dashed">
             {p.discountPrice ? (
               <>
-                <span className="text-5xl font-black text-primary">${p.discountPrice.toFixed(2)}</span>
-                <span className="text-2xl text-muted-foreground line-through font-bold">${p.price.toFixed(2)}</span>
+                <span className="text-5xl font-black text-primary">₹{p.discountPrice.toFixed(2)}</span>
+                <span className="text-2xl text-muted-foreground line-through font-bold">₹{p.price.toFixed(2)}</span>
               </>
             ) : (
-              <span className="text-5xl font-black text-primary">${p.price.toFixed(2)}</span>
+              <span className="text-5xl font-black text-primary">₹{p.price.toFixed(2)}</span>
             )}
           </div>
 
@@ -189,7 +188,7 @@ const ProductDetails: React.FC = () => {
                 <div className="rounded-full bg-primary/10 p-2 text-primary">
                   <Truck className="h-4 w-4" />
                 </div>
-                <span>Free delivery on orders over $50</span>
+                <span>Free delivery on orders over ₹50</span>
               </div>
               <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                 <div className="rounded-full bg-primary/10 p-2 text-primary">

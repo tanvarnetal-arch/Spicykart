@@ -15,8 +15,6 @@ import { Shield, Users, Package, TrendingUp, DollarSign, ShoppingBag, Plus, Edit
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import ProductForm from '@/components/ProductForm';
-import { demoProducts } from '@/data/demoProducts';
-
 const Admin: React.FC = () => {
   const { profile } = useAuth();
   const [users, setUsers] = useState<Profile[]>([]);
@@ -162,7 +160,7 @@ const Admin: React.FC = () => {
   const totalRevenue = orders.reduce((sum: number, o: any) => sum + (Number(o.totalAmount) || 0), 0);
 
   const stats = [
-    { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
+    { label: 'Total Revenue', value: `₹${totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
     { label: 'Total Products', value: products.length.toString(), icon: Package, color: 'text-blue-600', bg: 'bg-blue-100' },
     { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
     { label: 'Total Orders', value: orders.length.toString(), icon: ShoppingBag, color: 'text-orange-600', bg: 'bg-orange-100' },
@@ -180,48 +178,6 @@ const Admin: React.FC = () => {
             <p className="text-lg text-muted-foreground font-bold leading-relaxed">Control everything from products to users in your organic marketplace.</p>
           </div>
           <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={async () => {
-                if (!confirm('Clear all current products?')) return;
-                setIsLoading(true);
-                try {
-                  const snapshot = await getDocs(collection(db, 'products'));
-                  await Promise.all(snapshot.docs.map(d => deleteDoc(d.ref)));
-                  toast.success('Database cleared');
-                  fetchData();
-                } catch (e) {
-                  toast.error('Clear failed');
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
-              className="h-14 px-6 rounded-2xl border-destructive/20 text-destructive font-bold hover:bg-destructive/5"
-            >
-              Clear All
-            </Button>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                setIsLoading(true);
-                try {
-                  let count = 0;
-                  for (const p of demoProducts) {
-                    await productApi.create(p);
-                    count++;
-                  }
-                  toast.success(`Successfully added ${count} demo products!`);
-                  fetchData();
-                } catch (e: any) {
-                  toast.error('Seeding failed: ' + e.message);
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
-              className="h-14 px-8 rounded-2xl border-primary/20 text-primary font-black hover:bg-primary/5 shadow-none"
-            >
-              Seed 50 Products
-            </Button>
             <Button
               onClick={() => { setEditingProduct(null); setIsProductFormOpen(true); }}
               className="w-fit h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-xl shadow-primary/20 transition-all flex items-center gap-2"
@@ -317,7 +273,7 @@ const Admin: React.FC = () => {
                               </div>
                             </TableCell>
                             <TableCell><Badge variant="outline" className="font-bold border-primary/10 bg-primary/5">{product.category}</Badge></TableCell>
-                            <TableCell className="font-black text-primary">${product.price.toFixed(2)}</TableCell>
+                            <TableCell className="font-black text-primary">₹{product.price.toFixed(2)}</TableCell>
                             <TableCell>
                               <Badge className={
                                 product.stockStatus === 'in-stock' ? 'bg-green-100 text-green-700 font-bold border-none' :
@@ -387,7 +343,7 @@ const Admin: React.FC = () => {
                               <span className="text-xs text-muted-foreground font-bold">{order.profile?.email}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-black text-primary">${Number(order.totalAmount).toFixed(2)}</TableCell>
+                          <TableCell className="font-black text-primary">₹{Number(order.totalAmount).toFixed(2)}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               {getStatusIcon(order.status)}

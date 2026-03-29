@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, ShieldCheck, HeartPulse, ChevronRight, ShoppingCart } from 'lucide-react';
-import { categories } from '@/data/products';
 import { productApi } from '@/db/api';
 import { Product } from '@/types/products';
 import ProductCard from '@/components/ProductCard';
@@ -11,6 +10,7 @@ import PageMeta from '@/components/common/PageMeta';
 
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<{id: string, name: string, image: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +18,20 @@ const Home: React.FC = () => {
       try {
         const all = await productApi.getAll();
         setFeaturedProducts(all.slice(0, 4));
+
+        const catMap = new Map();
+        all.forEach((p: Product) => {
+            if(!catMap.has(p.category)) {
+                catMap.set(p.category, {
+                    id: p.category.toLowerCase().replace(/\s+/g, '-'),
+                    name: p.category,
+                    image: p.image || '/logo.png'
+                });
+            }
+        });
+        setDynamicCategories(Array.from(catMap.values()));
       } catch (error) {
-        console.error('Failed to fetch featured products:', error);
+        console.error('Failed to fetch products:', error);
       } finally {
         setIsLoading(false);
       }
@@ -124,7 +136,7 @@ const Home: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5 lg:gap-8">
-          {categories.map((category) => (
+          {dynamicCategories.map((category) => (
             <Link
               key={category.id}
               to={`/products?category=${encodeURIComponent(category.name)}`}
@@ -175,7 +187,7 @@ const Home: React.FC = () => {
               Made Easy & Delicious
             </h2>
             <p className="text-lg opacity-90 max-w-[500px] leading-relaxed">
-              Join thousands of happy customers who trust Spicy Kart for their daily dose of organic goodness. Get free shipping on orders over $50!
+              Join thousands of happy customers who trust Spicy Kart for their daily dose of organic goodness. Get free shipping on orders over ₹50!
             </p>
             <Link to="/products">
               <Button size="lg" className="h-16 px-12 text-xl rounded-2xl bg-accent hover:bg-accent/90 text-accent-foreground font-black shadow-xl shadow-black/10 transition-all scale-100 hover:scale-105">

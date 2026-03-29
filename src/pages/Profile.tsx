@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/db/firebase';
+import { orderApi } from '@/db/api';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Shield, Calendar, Edit2, Check, X, Camera, LogOut } from 'lucide-react';
+import { User, Mail, Shield, Calendar, Edit2, Check, X, Camera, LogOut, Package, Clock, Truck, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
@@ -19,12 +20,30 @@ const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.fullName || '');
     }
-  }, [profile]);
+    if (user) {
+      orderApi.getUserOrders(user.uid)
+        .then(setOrders)
+        .catch(console.error)
+        .finally(() => setLoadingOrders(false));
+    }
+  }, [profile, user]);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'delivered': return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'shipped': return <Truck className="h-5 w-5 text-blue-500" />;
+      case 'processing': return <Clock className="h-5 w-5 text-orange-500" />;
+      case 'cancelled': return <XCircle className="h-5 w-5 text-red-500" />;
+      default: return <Clock className="h-5 w-5 text-gray-500" />;
+    }
+  };
 
   const handleUpdateProfile = async () => {
     if (!user) return;
@@ -220,6 +239,66 @@ const ProfilePage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* My Orders Section */}
+        <div className="flex flex-col gap-6 mt-8">
+          <h2 className="text-3xl font-black text-foreground">My Orders & Tracking</h2>
+          {loadingOrders ? (
+            <div className="text-muted-foreground font-bold">Loading your orders...</div>
+          ) : orders.length === 0 ? (
+            <Card className="border-none shadow-xl rounded-[2.5rem] bg-white dark:bg-card p-12 flex flex-col items-center justify-center text-center gap-4">
+              <Package className="h-16 w-16 text-muted-foreground/30" />
+              <h3 className="text-2xl font-black">No Orders Yet</h3>
+              <p className="text-muted-foreground">You haven't placed any orders. Start exploring our organic collection!</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              {orders.map((order: any) => (
+                <Card key={order.id} className="border-none shadow-xl rounded-[2.5rem] bg-white dark:bg-card overflow-hidden">
+                  <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-secondary/30 p-6">
+                     <div className="flex flex-col gap-1">
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Tracking ID / Order ID</span>
+                        <span className="text-xl font-black text-foreground">#{order.id}</span>
+                     </div>
+                     <div className="flex items-center gap-4 bg-white dark:bg-card px-4 py-2 rounded-2xl shadow-sm border border-primary/5">
+                        {getStatusIcon(order.status)}
+                        <span className="font-bold capitalize text-primary text-sm md:text-base">
+                          {order.status === 'pending' ? 'Pending Admin Approval' : order.status}
+                        </span>
+                     </div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                     <div className="flex flex-col md:flex-row gap-8 justify-between">
+                        <div className="flex flex-col gap-4 flex-grow">
+                          <span className="font-bold text-muted-foreground border-b pb-2">Order Items</span>
+                          {order.items?.map((item: any, idx: number) => (
+                             <div key={idx} className="flex items-center gap-4">
+                               <img src={item.image} alt={item.name} className="h-12 w-12 rounded-lg object-cover bg-secondary" />
+                               <div className="flex flex-col">
+                                  <span className="font-bold">{item.name}</span>
+                                  <span className="text-sm text-muted-foreground">Qty: {item.quantity} × ₹{Number(item.price).toFixed(2)}</span>
+                               </div>
+                             </div>
+                          ))}
+                        </div>
+                        <div className="flex flex-col gap-2 min-w-[200px] border-l pl-8">
+                           <span className="font-bold text-muted-foreground border-b pb-2">Summary</span>
+                           <div className="flex justify-between font-bold text-sm mt-2">
+                              <span>Placed On:</span>
+                              <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                           </div>
+                           <div className="flex justify-between font-black text-lg mt-2 text-primary">
+                              <span>Total:</span>
+                              <span>₹{Number(order.totalAmount).toFixed(2)}</span>
+                           </div>
+                        </div>
+                     </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

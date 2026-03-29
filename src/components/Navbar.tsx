@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { productApi } from '@/db/api';
 import { ShoppingCart, Search, Menu, Sun, Moon, ChevronDown, User, Shield, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { categories } from '@/data/products';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Navbar: React.FC = () => {
@@ -16,7 +16,15 @@ const Navbar: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isThemeDark, setIsThemeDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [dynamicCategories, setDynamicCategories] = useState<{id: string, name: string}[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    productApi.getAll().then(products => {
+      const cats = Array.from(new Set(products.map(p => p.category)));
+      setDynamicCategories(cats.map(c => ({ id: c, name: c })));
+    }).catch(console.error);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +55,7 @@ const Navbar: React.FC = () => {
                 <Link to="/" className="text-lg font-semibold hover:text-primary transition-colors">Home</Link>
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Categories</span>
-                  {categories.map((category) => (
+                  {dynamicCategories.map((category) => (
                     <Link
                       key={category.id}
                       to={`/products?category=${encodeURIComponent(category.name)}`}
@@ -80,7 +88,7 @@ const Navbar: React.FC = () => {
               Categories <ChevronDown className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              {categories.map((category) => (
+              {dynamicCategories.map((category) => (
                 <DropdownMenuItem key={category.id} asChild>
                   <Link to={`/products?category=${encodeURIComponent(category.name)}`}>
                     {category.name}

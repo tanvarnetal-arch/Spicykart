@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { categories } from '@/data/products';
 import { toast } from 'sonner';
 import { Loader2, Upload, X } from 'lucide-react';
 
@@ -63,10 +62,35 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 600;
+
+          if (width > height && width > maxSize) {
+            height *= maxSize / width;
+            width = maxSize;
+          } else if (height > maxSize) {
+            width *= maxSize / height;
+            height = maxSize;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            setImagePreview(compressedBase64);
+            setFormData(prev => ({ ...prev, image: compressedBase64 }));
+            setImageFile(null); // Bypass Firebase Storage by keeping this null
+          }
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -109,8 +133,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label className="font-bold">Product Name</Label>
-              <Input 
-                value={formData.name} 
+              <Input
+                value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                 required
                 className="rounded-xl bg-secondary/30 border-none"
@@ -118,45 +142,39 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
             </div>
             <div className="space-y-2">
               <Label className="font-bold">Category</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={val => setFormData({ ...formData, category: val })}
-              >
-                <SelectTrigger className="rounded-xl bg-secondary/30 border-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                value={formData.category}
+                onChange={e => setFormData({ ...formData, category: e.target.value })}
+                required
+                placeholder="e.g. Badam, Seeds"
+                className="rounded-xl bg-secondary/30 border-none"
+              />
             </div>
             <div className="space-y-2">
-              <Label className="font-bold">Price ($)</Label>
-              <Input 
-                type="number" 
+              <Label className="font-bold">Price (₹)</Label>
+              <Input
+                type="number"
                 step="0.01"
-                value={formData.price} 
+                value={formData.price}
                 onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                 required
                 className="rounded-xl bg-secondary/30 border-none"
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-bold">Discount Price ($)</Label>
-              <Input 
-                type="number" 
+              <Label className="font-bold">Discount Price (₹)</Label>
+              <Input
+                type="number"
                 step="0.01"
-                value={formData.discountPrice} 
+                value={formData.discountPrice}
                 onChange={e => setFormData({ ...formData, discountPrice: parseFloat(e.target.value) })}
                 className="rounded-xl bg-secondary/30 border-none"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="font-bold">Description</Label>
-              <Textarea 
-                value={formData.description} 
+              <Textarea
+                value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                 required
                 className="rounded-xl bg-secondary/30 border-none min-h-[100px]"
@@ -164,8 +182,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
             </div>
             <div className="space-y-2">
               <Label className="font-bold">Stock Status</Label>
-              <Select 
-                value={formData.stockStatus} 
+              <Select
+                value={formData.stockStatus}
                 onValueChange={(val: any) => setFormData({ ...formData, stockStatus: val })}
               >
                 <SelectTrigger className="rounded-xl bg-secondary/30 border-none">
@@ -185,7 +203,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
                   {imagePreview ? (
                     <>
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      <button 
+                      <button
                         type="button"
                         onClick={() => { setImageFile(null); setImagePreview(''); setFormData({ ...formData, image: '' }); }}
                         className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -199,10 +217,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
                       <span className="text-xs font-bold">Upload Image</span>
                     </div>
                   )}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
                     onChange={handleImageChange}
                   />
                 </div>
@@ -210,16 +228,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ open, onOpenChange, product, 
             </div>
           </div>
           <DialogFooter className="pt-6">
-            <Button 
-              type="button" 
-              variant="ghost" 
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => onOpenChange(false)}
               className="rounded-xl font-bold"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading}
               className="rounded-xl bg-primary hover:bg-primary/90 text-white font-black px-8"
             >
