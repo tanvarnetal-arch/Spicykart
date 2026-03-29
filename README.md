@@ -33,9 +33,8 @@ Example:
 # Step 1: Download the code package
 # Step 2: Extract the code package
 # Step 3: Open the code package with your IDE and navigate into the code directory
-# Step 4: In the IDE terminal, run the command to install dependencies: npm i
-# Step 5: In the IDE terminal, run the command to start the development server: npm run dev -- --host 127.0.0.1
-```
+# Step 4: In the IDE terminal, run the command to install dependencies: pnpm install
+# Step 5: In the IDE terminal, run the command to start the development server: pnpm run dev
 
 ### How to develop backend services?
 
