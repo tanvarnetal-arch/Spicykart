@@ -50,8 +50,11 @@ export const processPayment = async (options: Partial<RazorpayOptions>) => {
     }
 
     try {
+        // Dynamic API URL for deployed environments
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
         // Step 1: Create an order via your local backend!
-        const orderResponse = await fetch('http://localhost:3001/api/create-order', {
+        const orderResponse = await fetch(`${API_URL}/api/create-order`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: options.amount })
@@ -75,7 +78,7 @@ export const processPayment = async (options: Partial<RazorpayOptions>) => {
             handler: async function (response: any) {
                 try {
                     // Step 3: Verify the payment signature on backend securely
-                    const verifyResponse = await fetch('http://localhost:3001/api/verify-payment', {
+                    const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/verify-payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
